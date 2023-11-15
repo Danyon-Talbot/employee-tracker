@@ -177,3 +177,43 @@ function addRole() {
           });
   });
 }
+
+function addEmployee() {
+  inquirer
+      .prompt([
+          {
+              type: 'input',
+              name: 'first_name',
+              message: 'Enter the first name of the employee:',
+          },
+          {
+              type: 'input',
+              name: 'last_name',
+              message: 'Enter the last name of the employee:',
+          },
+          {
+              type: 'input',
+              name: 'role_id',
+              message: 'Enter the role ID for the employee:',
+          },
+          {
+              type: 'input',
+              name: 'manager_id',
+              message: 'Enter the manager ID for the employee (if applicable):',
+          },
+      ])
+      .then((answers) => {
+          const employee = {
+              first_name: answers.first_name,
+              last_name: answers.last_name,
+              role_id: answers.role_id,
+              manager_id: answers.manager_id || null,
+          };
+
+          connection.query('INSERT INTO employees SET ?', employee, (err) => {
+              if (err) throw err;
+              console.log('Employee added successfully!');
+              startApp(); // Return to the main menu
+          });
+      });
+}
