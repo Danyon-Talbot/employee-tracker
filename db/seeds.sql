@@ -1,25 +1,25 @@
-INSERT INTO departments (id, name)
+INSERT INTO departments (name)
 VALUES
-  (1, 'Human Resources'),
-  (2, 'Technology'),
-  (3, 'Marketing');
+  ('Human Resources'),
+  ('Technology'),
+  ('Marketing');
 
 
-INSERT INTO roles (id, title, salary, department_id)
+INSERT INTO roles (title, salary, department_id)
 VALUES
-  (1, 'HR Manager', 50000, 1),
-  (2, 'Employee Welfare Manager', 40000, 1),
-  (3, 'Support Technician', 35000, 2),
-  (4, 'Software Engineer', 80000, 2),
-  (5, 'PR Manager', 50000, 3),
-  (6, 'Advertisement Manager', 45000, 3);
+  ('HR Manager', 50000, 1),
+  ('Employee Welfare Manager', 40000, 1),
+  ('Support Technician', 35000, 2),
+  ('Software Engineer', 80000, 2),
+  ('PR Manager', 50000, 3),
+  ('Advertisement Manager', 45000, 3);
 
 
-INSERT INTO employees (id, first_name, last_name, role_id, manager_id)
+INSERT INTO employees (first_name, last_name, role_id, manager_id)
 VALUES
-  (1, 'John', 'Doe', 1, NULL),
-  (2, 'Jane', 'Smith', 1, 1),
-  (3, 'Bob', 'Johnson', 2, NULL),
-  (4, 'Bill', 'Billson', 2, 3),
-  (5, 'Mary', 'Pinket', 3, NULL),
-  (6, 'Samuel', 'Travis', 3, 5);
+  ('John', 'Doe', 1, NULL),
+  ('Jane', 'Smith', 2, 1),
+  ('Bob', 'Johnson', 4, NULL),
+  ('Bill', 'Billson', 3, 3),
+  ('Mary', 'Pinket', 5, NULL),
+  ('Samuel', 'Travis', 6, 5);

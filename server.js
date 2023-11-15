@@ -103,3 +103,117 @@ function viewAllEmployees() {
     startApp();
   });
 }
+
+function addDepartment() {
+  inquirer
+      .prompt({
+          type: 'input',
+          name: 'name',
+          message: 'Enter the name of the department:',
+      })
+      .then((answers) => {
+          const department = {
+              name: answers.name,
+          };
+
+          connection.query('INSERT INTO departments SET ?', department, (err) => {
+              if (err) throw err;
+              console.log('Department added successfully!');
+              startApp();
+          });
+      });
+}
+
+function addRole() {
+  // Fetch and display a list of currently stored departments
+  connection.query('SELECT id, name FROM departments', (err, departments) => {
+      if (err) throw err;
+
+      // Extract department names from the result
+      const departmentNames = departments.map((department) => department.name);
+
+      inquirer
+          .prompt([
+              {
+                  type: 'input',
+                  name: 'title',
+                  message: 'Enter the title of the role:',
+              },
+              {
+                  type: 'input',
+                  name: 'salary',
+                  message: 'Enter the salary for the role:',
+              },
+              {
+                  type: 'list',
+                  name: 'departmentName',
+                  message: 'Select the department for the role:',
+                  choices: departmentNames, // Displays departments from database as choices
+              },
+          ])
+          .then((answers) => {
+              // Find the department ID based on the selected department name
+              const selectedDepartment = departments.find(
+                  (department) => department.name === answers.departmentName
+              );
+
+              if (!selectedDepartment) {
+                  console.log('Invalid department selection.');
+                  startApp();
+                  return;
+              }
+
+              const role = {
+                  title: answers.title,
+                  salary: answers.salary,
+                  department_id: selectedDepartment.id,
+              };
+
+              connection.query('INSERT INTO roles SET ?', role, (err) => {
+                  if (err) throw err;
+                  console.log('Role added successfully!');
+                  startApp();
+              });
+          });
+  });
+}
+
+function addEmployee() {
+  inquirer
+      .prompt([
+          {
+              type: 'input',
+              name: 'first_name',
+              message: 'Enter the first name of the employee:',
+          },
+          {
+              type: 'input',
+              name: 'last_name',
+              message: 'Enter the last name of the employee:',
+          },
+          {
+              type: 'input',
+              name: 'role_id',
+              message: 'Enter the role ID for the employee:',
+          },
+          {
+              type: 'input',
+              name: 'manager_id',
+              message: 'Enter the manager ID for the employee (if applicable):',
+          },
+      ])
+      .then((answers) => {
+          const employee = {
+              first_name: answers.first_name,
+              last_name: answers.last_name,
+              role_id: answers.role_id,
+              manager_id: answers.manager_id || null,
+          };
+
+          connection.query('INSERT INTO employees SET ?', employee, (err) => {
+              if (err) throw err;
+              console.log('Employee added successfully!');
+              startApp(); // Return to the main menu
+          });
+      });
+}
