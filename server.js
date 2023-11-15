@@ -179,41 +179,72 @@ function addRole() {
 }
 
 function addEmployee() {
-  inquirer
-      .prompt([
-          {
-              type: 'input',
-              name: 'first_name',
-              message: 'Enter the first name of the employee:',
-          },
-          {
-              type: 'input',
-              name: 'last_name',
-              message: 'Enter the last name of the employee:',
-          },
-          {
-              type: 'input',
-              name: 'role_id',
-              message: 'Enter the role ID for the employee:',
-          },
-          {
-              type: 'input',
-              name: 'manager_id',
-              message: 'Enter the manager ID for the employee (if applicable):',
-          },
-      ])
-      .then((answers) => {
-          const employee = {
-              first_name: answers.first_name,
-              last_name: answers.last_name,
-              role_id: answers.role_id,
-              manager_id: answers.manager_id || null,
-          };
+  // Fetch and display a list of all current roles
+  connection.query('SELECT id, title FROM roles', (err, roles) => {
+      if (err) throw err;
 
-          connection.query('INSERT INTO employees SET ?', employee, (err) => {
-              if (err) throw err;
-              console.log('Employee added successfully!');
-              startApp(); // Return to the main menu
-          });
+      // Extract role titles from the result
+      const roleTitles = roles.map((role) => role.title);
+
+      // Fetch and display a list of all current employees to select a manager
+      connection.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employees', (err, employees) => {
+          if (err) throw err;
+
+          // Extract employee names from the result
+          const employeeNames = employees.map((employee) => employee.name);
+
+          inquirer
+              .prompt([
+                  {
+                      type: 'input',
+                      name: 'first_name',
+                      message: 'Enter the employee\'s first name:',
+                  },
+                  {
+                      type: 'input',
+                      name: 'last_name',
+                      message: 'Enter the employee\'s last name:',
+                  },
+                  {
+                      type: 'list', // Use a list type for role selection
+                      name: 'roleTitle',
+                      message: 'Select the employee\'s role:',
+                      choices: roleTitles, // Display role titles as choices
+                  },
+                  {
+                      type: 'list', // Use a list type for manager selection
+                      name: 'managerName',
+                      message: 'Select the employee\'s manager:',
+                      choices: employeeNames, // Display employee names as choices
+                  },
+              ])
+              .then((answers) => {
+                  // Finds the role ID based on the selected role title
+                  const selectedRole = roles.find((role) => role.title === answers.roleTitle);
+
+                  // Finds the manager ID based on the selected manager name
+                  const selectedManager = employees.find((employee) => employee.name === answers.managerName);
+
+                  if (!selectedRole || !selectedManager) {
+                      console.log('Invalid role or manager selection.');
+                      startApp();
+                      return;
+                  }
+
+                  const employee = {
+                      first_name: answers.first_name,
+                      last_name: answers.last_name,
+                      role_id: selectedRole.id,
+                      manager_id: selectedManager.id,
+                  };
+
+                  connection.query('INSERT INTO employees SET ?', employee, (err) => {
+                      if (err) throw err;
+                      console.log('Employee added successfully!');
+                      startApp(); // Return to the main menu
+                  });
+              });
       });
+  });
 }
+
