@@ -248,3 +248,59 @@ function addEmployee() {
   });
 }
 
+function updateRole() {
+  // Fetch and display a list of all current employees
+  connection.query('SELECT id, CONCAT(first_name, " ", last_name) AS name FROM employees', (err, employees) => {
+      if (err) throw err;
+
+      // Extract employee names from the result
+      const employeeNames = employees.map((employee) => employee.name);
+
+      // Fetch and display a list of all current roles
+      connection.query('SELECT id, title FROM roles', (err, roles) => {
+          if (err) throw err;
+
+          // Extract role titles from the result
+          const roleTitles = roles.map((role) => role.title);
+
+          inquirer
+              .prompt([
+                  {
+                      type: 'list', // Use a list type for employee selection
+                      name: 'employeeName',
+                      message: 'Select the employee to update:',
+                      choices: employeeNames, // Display employee names as choices
+                  },
+                  {
+                      type: 'list', // Use a list type for role selection
+                      name: 'newRoleTitle',
+                      message: 'Select the employee\'s new role:',
+                      choices: roleTitles, // Display role titles as choices
+                  },
+              ])
+              .then((answers) => {
+                  // Find the employee ID based on the selected employee name
+                  const selectedEmployee = employees.find((employee) => employee.name === answers.employeeName);
+
+                  // Find the role ID based on the selected role title
+                  const selectedRole = roles.find((role) => role.title === answers.newRoleTitle);
+
+                  if (!selectedEmployee || !selectedRole) {
+                      console.log('Invalid employee or role selection.');
+                      startApp(); // Return to the main menu
+                      return;
+                  }
+
+                  connection.query(
+                      'UPDATE employees SET role_id = ? WHERE id = ?',
+                      [selectedRole.id, selectedEmployee.id],
+                      (err) => {
+                          if (err) throw err;
+                          console.log('Employee role updated successfully!');
+                          startApp(); // Return to the main menu
+                      }
+                  );
+              });
+      });
+  });
+}
